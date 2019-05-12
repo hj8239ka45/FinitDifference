@@ -2,15 +2,15 @@ clear;clc;close all;
 
 %使用者自訂
 x = 0.02;%x取樣-->0.02m(or 0.01)
-t=0.1;  %設定時間間隔為0.01
-Time = 10;%取20秒內結果
+t=0.01;  %設定時間間隔為0.01
+Time = 10;%取10秒內結果
 %% explicit
 
 y = x;   %y取樣-->0.02m
 W = 0.04;%寬
 L = 0.08;%長
-sample_y = 1 + W/y
-sample_x = 1 + L/2/x %把銅和鋼分開取
+sample_y = 1 + W/y;
+sample_x = 1 + L/2/x; %把銅和鋼分開取
 
 T=[700;700;700;700;700;700;700;700;700; 1000;1000;1000;900;900;900;800;800;800];%初始溫度
 if x==0.01
@@ -86,7 +86,7 @@ for i=1:sample_y^2*2
     end
 end
 %setting A
-A = Fo_R.*[D zeros(sample_y^2,sample_x^2);zeros(sample_y^2,sample_x^2) D]     %整合有限差分法運算
+A = Fo_R.*[D zeros(sample_y^2,sample_x^2);zeros(sample_y^2,sample_x^2) D];     %整合有限差分法運算
 %setting E
 E_c =2*Fo_c*Bi_c*eye(sample_y,sample_x);
 E_st=2*Fo_st*Bi_st*eye(sample_y,sample_x);
@@ -120,40 +120,54 @@ for n=2:1:Time/t
 end
 tt=t:t:Time/t*t;
 
+T_data1=zeros(sample_y,sample_x*2,Time/t);
+T_data2=zeros(sample_y,sample_x*2,Time/t);
+k=1;
+for i=1:sample_y
+    k=i;
+    for j=1:sample_x*2
+        T_data1(i,j,:)=T_time1(k,:);
+        T_data2(i,j,:)=T_time2(k,:);
+        k=k+sample_x;
+    end
+end
+
 figure(1);
 subplot(3,2,1);
-plot(tt,T_time1(1,:));hold on;plot(tt,T_time2(1,:));
+T_plot(:,:)=T_data1((sample_y+1)/2,:,:);
+T_plot2(:,:)=T_data2((sample_y+1)/2,:,:);
+plot(tt,T_plot(1,:));hold on;plot(tt,T_plot2(1,:));
 axis([ 0, Time,700 ,1000]);
 title("Theta scheme for T1,2");
 xlabel("Time(s)");
 ylabel("Temp(K)");
 legend("Explit.","Implit.",'Location','northeast');
-subplot(3,2,2);
-plot(tt,T_time1(4,:));hold on;plot(tt,T_time2(4,:));
+subplot(3,2,2);%1+(sample_x-1)/2
+plot(tt,T_plot(1+(sample_x-1)/2,:));hold on;plot(tt,T_plot2(1+(sample_x-1)/2,:));
 axis([ 0, Time,700 ,1000]);
 title("Theta scheme for T2,2");
 xlabel("Time(s)");
 ylabel("Temp(K)");
-subplot(3,2,3);
-plot(tt,T_time1(7,:));hold on;plot(tt,T_time2(7,:));
+subplot(3,2,3);%1+(sample_x-1)/2*2
+plot(tt,T_plot(1+(sample_x-1)/2*2,:));hold on;plot(tt,T_plot2(1+(sample_x-1)/2*2,:));
 axis([ 0, Time,700 ,1000]);
 title("Theta scheme for T3,2");
 xlabel("Time(s)");
 ylabel("Temp(K)");
-subplot(3,2,4);
-plot(tt,T_time1(10,:));hold on;plot(tt,T_time2(10,:));
+subplot(3,2,4);%2+(sample_x-1)/2*2
+plot(tt,T_plot(2+(sample_x-1)/2*2,:));hold on;plot(tt,T_plot2(2+(sample_x-1)/2*2,:));
 axis([ 0, Time,700 ,1000]);
 title("Theta scheme for T4,2");
 xlabel("Time(s)");
 ylabel("Temp(K)");
-subplot(3,2,5);
-plot(tt,T_time1(13,:));hold on;plot(tt,T_time2(13,:));
+subplot(3,2,5);%2+(sample_x-1)/2*3
+plot(tt,T_plot(2+(sample_x-1)/2*3,:));hold on;plot(tt,T_plot2(2+(sample_x-1)/2*3,:));
 axis([ 0, Time,700 ,1000]);
 title("Theta scheme for T5,2");
 xlabel("Time(s)");
 ylabel("Temp(K)");
-subplot(3,2,6);
-plot(tt,T_time1(16,:));hold on;plot(tt,T_time2(16,:));
+subplot(3,2,6);%2+(sample_x-1)/2*4
+plot(tt,T_plot(2+(sample_x-1)/2*4,:));hold on;plot(tt,T_plot2(2+(sample_x-1)/2*4,:));
 axis([ 0, Time,700 ,1000]);
 title("Theta scheme for T6,2");
 xlabel("Time(s)");
@@ -162,17 +176,6 @@ ylabel("Temp(K)");
 
 %% 動畫製作
 % figure(2);
-% T_data1=zeros(sample_y,sample_x*2,Time/t);
-% T_data2=zeros(sample_y,sample_x*2,Time/t);
-% k=1;
-% for i=1:sample_y
-%     k=i;
-%     for j=1:sample_x*2
-%         T_data1(i,j,:)=T_time1(k,:);
-%         T_data2(i,j,:)=T_time2(k,:);
-%         k=k+sample_x;
-%     end
-% end
 % i=1:sample_x*2;
 % j=1:sample_y;
 % [XX,YY]=meshgrid(i*x,j*y);
