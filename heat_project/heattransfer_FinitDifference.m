@@ -2,7 +2,7 @@ clear;clc;close all;
 
 %使用者自訂
 x = 0.02;%x取樣-->0.02m(or 0.01)
-t=0.01;  %設定時間間隔為0.01
+t=0.1;  %設定時間間隔為0.1
 Time = 10;%取10秒內結果
 %% explicit
 
@@ -174,34 +174,60 @@ xlabel("Time(s)");
 ylabel("Temp(K)");
 
 
-%% 動畫製作
-% figure(2);
-% i=1:sample_x*2;
-% j=1:sample_y;
-% [XX,YY]=meshgrid(i*x,j*y);
-% for tt=1:Time/t
-%     subplot(2,1,1);
-%     [c,h]=contour(XX,YY,T_data1(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
-%     clabel(c,h);%標示線的溫度數值
-%     title("Theta distribution (Explit.)");
-%     xlabel("Time(s)");
-%     ylabel("Temp(K)");
-%     subplot(2,1,2);
-%     [c,h]=contour(XX,YY,T_data2(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
-%     clabel(c,h);%標示線的溫度數值
-%     title("Theta distribution (Implit.)");
-%     xlabel("X(m)");
-%     ylabel("Y(m)");
-%     % <動畫抓取
-%     frames(1)=getframe(gcf);
-%     [image,map]=frame2im(frames(1));
-%     [im,map2]=rgb2ind(image,128);
-%     % <gif製作 -->在同一資料夾中建立heattransfer_project.gif的gif檔案
-%     if tt==1
-%         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','overwrite','delaytime',0.1,'loopcount',inf);
-%     else
-%         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','append','delaytime',0.1);
-%     end
-%     % /gif製作>
-%     % /動畫抓取>
-% end
+% 動畫製作
+figure(2);
+i=1:sample_x*2;
+j=1:sample_y;
+[XX,YY]=meshgrid(i*x,j*y);
+for tt=1:Time/t
+    subplot(2,1,1);
+    [c,h]=contour(XX,YY,T_data1(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
+    
+    hold on;
+    %streamline
+    u = zeros(sample_y,sample_x*2);
+    for a=1:sample_x*2
+        if a~=1
+            u(:,a) = (-T_data1(:,a,tt)+T_data1(:,a-1,tt))/sample_x;
+        end
+    end
+    v = zeros(sample_y,sample_x*2);
+    quiver(XX,YY,u,v)
+    hold off;
+    
+    clabel(c,h);%標示線的溫度數值
+    title("Theta distribution (Explit.)");
+    xlabel("Time(s)");
+    ylabel("Temp(K)");
+    subplot(2,1,2);
+    [c,h]=contour(XX,YY,T_data2(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
+    
+    hold on;
+    %streamline
+    u = zeros(sample_y,sample_x*2);
+    for a=1:sample_x*2
+        if a~=1
+            u2(:,a) = (-T_data2(:,a,tt)+T_data2(:,a-1,tt))/sample_x;
+        end
+    end
+    v = zeros(sample_y,sample_x*2);
+    quiver(XX,YY,u2,v)
+    hold off;
+    
+    clabel(c,h);%標示線的溫度數值
+    title("Theta distribution (Implit.)");
+    xlabel("X(m)");
+    ylabel("Y(m)");
+    % <動畫抓取
+    frames(1)=getframe(gcf);
+    [image,map]=frame2im(frames(1));
+    [im,map2]=rgb2ind(image,128);
+    % <gif製作 -->在同一資料夾中建立heattransfer_project.gif的gif檔案
+    if tt==1
+        imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','overwrite','delaytime',0.1,'loopcount',inf);
+    else
+        imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','append','delaytime',0.1);
+    end
+    % /gif製作>
+    % /動畫抓取>
+end
