@@ -1,7 +1,7 @@
 clear;clc;close all;
 
 %使用者自訂
-x = 0.02;%x取樣-->0.02m(or 0.01)
+x = 0.01;%x取樣-->0.02m(or 0.01)
 t=0.1;  %設定時間間隔為0.1
 Time = 10;%取10秒內結果
 %% explicit
@@ -12,8 +12,10 @@ L = 0.08;%長
 sample_y = 1 + W/y;
 sample_x = 1 + L/2/x; %把銅和鋼分開取
 
-T=[700;700;700;700;700;700;700;700;700; 1000;1000;1000;900;900;900;800;800;800];%初始溫度
-if x==0.01
+
+if x==0.02
+    T=[700,700,700,700,700,700,700,700,700,1000,1000,1000,900,900,900,800,800,800];%初始溫度
+elseif x==0.01
     T(1:25)=700;
     T(26:30)=1000;T(36:40)=900;T(46:50)=800;
     T(31:35)=(T(26)+T(36))/2;T(41:45)=(T(36)+T(46))/2;
@@ -102,7 +104,7 @@ I=eye(sample_y^2*2,sample_x^2*2);%單位矩陣-->用來考量上一時間點的數據
 T1=I+A+B; %整合有限差分法(外顯)的邊界矩正以及上一時間點資料
 
 
-Temp1=T;        %溫度時間資料(溫度隨時間疊加)
+Temp1=T';        %溫度時間資料(溫度隨時間疊加)
 T_time1 = zeros(sample_y*sample_x*2,Time/t);%(18筆)溫度資料*(100筆)時間資料
 T_time1(:,1) = Temp1(:,1);%第一筆不隨時間改變
 for n=2:1:Time/t
@@ -111,7 +113,7 @@ for n=2:1:Time/t
 end
 %% implicit
 T2=I-A-B; %整合有限差分法(內顯)的邊界矩正以及上一時間點資料
-Temp2=T;    %溫度時間資料(溫度隨時間疊加)
+Temp2=T';    %溫度時間資料(溫度隨時間疊加)
 T_time2 = zeros(sample_y*sample_x*2,Time/t);%(18筆)溫度資料*(100筆)時間資料
 T_time2(:,1) = Temp2(:,1);%第一筆不隨時間改變
 for n=2:1:Time/t
@@ -175,59 +177,91 @@ ylabel("Temp(K)");
 
 
 % 動畫製作
-figure(2);
-i=1:sample_x*2;
-j=1:sample_y;
-[XX,YY]=meshgrid(i*x,j*y);
-for tt=1:Time/t
-    subplot(2,1,1);
-    [c,h]=contour(XX,YY,T_data1(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
-    
+% figure(2);
+% i=1:sample_x*2;
+% j=1:sample_y;
+% [XX,YY]=meshgrid(i*x,j*y);
+% for tt=1:Time/t
+%     subplot(2,1,1);
+%     [c,h]=contour(XX,YY,T_data1(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
+%     
+%     hold on;
+%     %streamline
+%     u = zeros(sample_y,sample_x*2);
+%     for a=1:sample_x*2
+%         if a~=1
+%             u(:,a) = (-T_data1(:,a,tt)+T_data1(:,a-1,tt))/sample_x;
+%         end
+%     end
+%     v = zeros(sample_y,sample_x*2);
+%     quiver(XX,YY,u,v)
+%     hold off;
+%     
+%     clabel(c,h);%標示線的溫度數值
+%     title("Theta distribution (Explit.)");
+%     xlabel("Time(s)");
+%     ylabel("Temp(K)");
+%     subplot(2,1,2);
+%     [c,h]=contour(XX,YY,T_data2(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
+%     
+%     hold on;
+%     %streamline
+%     u = zeros(sample_y,sample_x*2);
+%     for a=1:sample_x*2
+%         if a~=1
+%             u2(:,a) = (-T_data2(:,a,tt)+T_data2(:,a-1,tt))/sample_x;
+%         end
+%     end
+%     v = zeros(sample_y,sample_x*2);
+%     quiver(XX,YY,u2,v)
+%     hold off;
+%     
+%     clabel(c,h);%標示線的溫度數值
+%     title("Theta distribution (Implit.)");
+%     xlabel("X(m)");
+%     ylabel("Y(m)");
+%     % <動畫抓取
+%     frames(1)=getframe(gcf);
+%     [image,map]=frame2im(frames(1));
+%     [im,map2]=rgb2ind(image,128);
+%     % <gif製作 -->在同一資料夾中建立heattransfer_project.gif的gif檔案
+%     if tt==1
+%         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','overwrite','delaytime',0.1,'loopcount',inf);
+%     else
+%         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','append','delaytime',0.1);
+%     end
+%     % /gif製作>
+%     % /動畫抓取>
+% end
+%% 比教semi-infinite
+if x==0.02
+    T_semi = [700,700,700,700,700,700,700,700,700,800,800,800,800,800,800,800,800,800];
+elseif x==0.01
+    T_semi = [700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800];
+end
+T_sem(:,1) = T_semi;
+T_s = ((k_c*rho_c*c_c)^0.5*700+(k_st*rho_st*c_st)^0.5*800)/((k_c*rho_c*c_c)^0.5+(k_st*rho_st*c_st)^0.5)
+for n=2:1:Time/t
+    for i=1:sample_x^2
+        T_sem(i,n) = erf(fix((sample_x^2-i)/sample_x)*x/(4*alpha_c*n))*(700-T_s)+T_s;
+    end
+    for i=sample_x^2+1:sample_x^2*2
+        T_sem(i,n) = erf(fix((i-sample_x^2-1)/sample_x)*x/(4*alpha_c*n))*(800-T_s)+T_s;
+    end
+    %T_semi_1(10:18,n) = erf(x/(4*alpha_st*n))*(800-700)+700;
+end
+
+for i=1:sample_y
+    k=i;
+    for j=1:sample_x*2
+        T_sem_data(i,j,:)=T_sem(k,:);
+        k=k+sample_x;
+    end
+end
+T_sem_plot(:,:) = T_sem_data((sample_y+1)/2,:,:);
+xx = x:x:2*sample_x*x;
+figure
+for i=1:Time/t
+    plot(xx,T_sem_plot(:,i));
     hold on;
-    %streamline
-    u = zeros(sample_y,sample_x*2);
-    for a=1:sample_x*2
-        if a~=1
-            u(:,a) = (-T_data1(:,a,tt)+T_data1(:,a-1,tt))/sample_x;
-        end
-    end
-    v = zeros(sample_y,sample_x*2);
-    quiver(XX,YY,u,v)
-    hold off;
-    
-    clabel(c,h);%標示線的溫度數值
-    title("Theta distribution (Explit.)");
-    xlabel("Time(s)");
-    ylabel("Temp(K)");
-    subplot(2,1,2);
-    [c,h]=contour(XX,YY,T_data2(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
-    
-    hold on;
-    %streamline
-    u = zeros(sample_y,sample_x*2);
-    for a=1:sample_x*2
-        if a~=1
-            u2(:,a) = (-T_data2(:,a,tt)+T_data2(:,a-1,tt))/sample_x;
-        end
-    end
-    v = zeros(sample_y,sample_x*2);
-    quiver(XX,YY,u2,v)
-    hold off;
-    
-    clabel(c,h);%標示線的溫度數值
-    title("Theta distribution (Implit.)");
-    xlabel("X(m)");
-    ylabel("Y(m)");
-    % <動畫抓取
-    frames(1)=getframe(gcf);
-    [image,map]=frame2im(frames(1));
-    [im,map2]=rgb2ind(image,128);
-    % <gif製作 -->在同一資料夾中建立heattransfer_project.gif的gif檔案
-    if tt==1
-        imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','overwrite','delaytime',0.1,'loopcount',inf);
-    else
-        imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','append','delaytime',0.1);
-    end
-    % /gif製作>
-    % /動畫抓取>
 end
