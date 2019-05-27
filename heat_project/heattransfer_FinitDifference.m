@@ -1,9 +1,9 @@
 clear;clc;close all;
 
 %使用者自訂
-x = 0.00125;%x取樣-->0.02m(or 0.01)
-t=0.025;  %設定時間間隔為0.1
-Time = 10;%取10秒內結果
+x = 0.02;%x取樣-->0.02m(or 0.01)
+t=0.1;  %設定時間間隔為0.1
+Time = 200;%取10秒內結果
 
 %基本參數
 y = x;   %y取樣-->0.02m
@@ -32,8 +32,8 @@ while (n)>=1
 end
 n=pow;
 for num=1:sample_y-2
-    k_z1=1/den^n*(num*(k_x1)+(sample_y-1-num)*k_y1)
-    k_z2=1/den^n*(num*(k_x2)+(sample_y-1-num)*k_y2)
+    k_z1=1/den^n*(num*(k_x1)+(sample_y-1-num)*k_y1);
+    k_z2=1/den^n*(num*(k_x2)+(sample_y-1-num)*k_y2);
     T(k_z1:k_z2)=1/den^n*(num*T(k_x1:k_x2)+(sample_y-1-num)*T(k_y1:k_y2));
 end
 
@@ -150,7 +150,8 @@ for i=1:sample_y
 end
 
 tt=t:t:Time/t*t;
-figure(1);
+
+figure
 subplot(3,2,1);
 T_plot(:,:)=T_data1((sample_y+1)/2,:,:);
 T_plot2(:,:)=T_data2((sample_y+1)/2,:,:);
@@ -192,12 +193,14 @@ xlabel("Time(s)");
 ylabel("Temp(K)");
 
 
-% 動畫製作
-% figure(2);
+% % % 動畫製作
 % i=1:sample_x*2;
 % j=1:sample_y;
 % [XX,YY]=meshgrid(i*x,j*y);
 % for tt=1:Time/t
+%     %1 if rem(tt,10)==0||tt==1
+%         %1 figure
+%     
 %     subplot(2,1,1);
 %     [c,h]=contour(XX,YY,T_data1(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
 %     
@@ -214,12 +217,17 @@ ylabel("Temp(K)");
 %     hold off;
 %     
 %     clabel(c,h);%標示線的溫度數值
-%     title("Theta distribution (Explit.)");
-%     xlabel("Time(s)");
-%     ylabel("Temp(K)");
+%     %1 if tt==1
+%     %1    ttt=0;
+%     %1 end
+%
+%     string = "Theta distribution (Explit.) t="+tt/10;
+%     title(string);
+%     xlabel("X(m)");
+%     ylabel("Y(m)");
+%     
 %     subplot(2,1,2);
 %     [c,h]=contour(XX,YY,T_data2(:,:,tt),[700:20:1000]);%等溫線圖-->[700:20:1000]畫線區間
-%     
 %     hold on;
 %     %streamline
 %     u = zeros(sample_y,sample_x*2);
@@ -231,66 +239,60 @@ ylabel("Temp(K)");
 %     v = zeros(sample_y,sample_x*2);
 %     quiver(XX,YY,u2,v)
 %     hold off;
-%     
 %     clabel(c,h);%標示線的溫度數值
-%     title("Theta distribution (Implit.)");
+%     string2 = "Theta distribution (Implit.) t="+ttt/10;
+%     title(string2);
 %     xlabel("X(m)");
 %     ylabel("Y(m)");
-%     % <動畫抓取
-%     frames(1)=getframe(gcf);
-%     [image,map]=frame2im(frames(1));
-%     [im,map2]=rgb2ind(image,128);
-%     % <gif製作 -->在同一資料夾中建立heattransfer_project.gif的gif檔案
-%     if tt==1
-%         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','overwrite','delaytime',0.1,'loopcount',inf);
-%     else
-%         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','append','delaytime',0.1);
-%     end
-%     % /gif製作>
-%     % /動畫抓取>
+%     %1 end
+% %     % <動畫抓取
+% %     frames(1)=getframe(gcf);
+% %     [image,map]=frame2im(frames(1));
+% %     [im,map2]=rgb2ind(image,128);
+% %     % <gif製作 -->在同一資料夾中建立heattransfer_project.gif的gif檔案
+% %     if tt==1
+% %         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','overwrite','delaytime',0.1,'loopcount',inf);
+% %     else
+% %         imwrite(im,map2,'heattransfer_project.gif','gif','writeMode','append','delaytime',0.1);
+% %     end
+% %     % /gif製作>
+% %     % /動畫抓取>
 % end
 
-% %% 比教semi-infinite
-% if x==0.02
-%     T_semi = [700,700,700,700,700,700,700,700,700,800,800,800,800,800,800,800,800,800];
-% elseif x==0.01
-%     T_semi = [700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,700,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800,800];
-% end
-% T_sem(:,1) = T_semi;
-% T_s = ((k_c*rho_c*c_c)^0.5*700+(k_st*rho_st*c_st)^0.5*800)/((k_c*rho_c*c_c)^0.5+(k_st*rho_st*c_st)^0.5)
-% for n=2:1:Time/t
-%     for i=1:sample_x^2
-%         T_sem(i,n) = erf(fix((sample_x^2-i)/sample_x)*x/(4*alpha_c*n))*(700-T_s)+T_s;
-%     end
-%     for i=sample_x^2+1:sample_x^2*2
-%         T_sem(i,n) = erf(fix((i-sample_x^2-1)/sample_x)*x/(4*alpha_c*n))*(800-T_s)+T_s;
-%     end
-%     %T_semi_1(10:18,n) = erf(x/(4*alpha_st*n))*(800-700)+700;
-% end
-% 
-% for i=1:sample_y
-%     k=i;
-%     for j=1:sample_x*2
-%         T_sem_data(i,j,:)=T_sem(k,:);
-%         k=k+sample_x;
-%     end
-% end
-% T_sem_plot(:,:) = T_sem_data((sample_y+1)/2,:,:);
-% xx = x:x:2*sample_x*x;
-% figure
-% for i=1:Time/t
-%     plot(xx,T_sem_plot(:,i));
-%     hold on;
-% end
+%% 比教semi-infinite
+T_semi = T;
+R_c = (pi*alpha_c*tt).^0.5/k_c + R;
+R_st = (pi*alpha_st*tt).^0.5/k_st + R;
+T_s = (700*R_st+1000*R_c)/(R_st+R_c);
+T_sem(:,1) = T_semi;
+for n=2:1:Time/t
+    for i=1:sample_x^2
+        T_sem(i,n) = erf(fix((sample_x^2-i)/sample_x)*x/(4*alpha_c*n))*(700-T_s)+T_s;
+    end
+    for i=sample_x^2+1:sample_x^2*2
+        T_sem(i,n) = erf(fix((i-sample_x^2-1)/sample_x)*x/(4*alpha_c*n))*(1000-T_s)+T_s;
+    end
+end
+
+T_data3 = zeros(sample_y,sample_x*2,Time/t);
+for i=1:sample_y
+    k=i;
+    for j=1:sample_x*2
+        T_data3(i,j,:)=T_sem(k,:);
+        k=k+sample_x;
+    end
+end
+
 k=0;
 for j= 1:sample_x*2
     k=k+1;
     if j==sample_x
         k=k-1;
     else
-        T_data_semi(k,:) = T_data1(3,j,:);
+        T_data_semi(k,:) = T_data3((sample_y+1)/2,j,:);
     end
 end
+
 xx = x:x:(2*sample_x-1)*x;
 figure
 for i=1:Time/t
